@@ -54,10 +54,10 @@ export function FileUpload({ onFileSelect, isLoading }: FileUploadProps) {
     <div className="w-full">
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300 hover:border-primary/50"} ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`border-2 border-dashed rounded-xl p-8 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md ${isDragActive ? "border-primary bg-primary/10 scale-[1.01]" : "border-primary/20 hover:border-primary/40 hover:bg-muted/20"} ${isLoading ? "opacity-80 cursor-not-allowed" : ""}`}
       >
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center justify-center gap-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-6 text-center">
           <OCROptionsForm
             documentType={documentType}
             enhancePreprocessing={enhancePreprocessing}
@@ -72,16 +72,21 @@ export function FileUpload({ onFileSelect, isLoading }: FileUploadProps) {
           />
           {!preview && (
             <>
-              <div className="p-4 rounded-full bg-primary/10">
-                <Upload className="h-10 w-10 text-primary" />
+              <div className="p-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 shadow-md border border-primary/10">
+                <Upload className="h-12 w-12 text-primary animate-pulse" />
               </div>
-              <div>
-                <p className="font-medium text-lg">Drag & drop your image here</p>
-                <p className="text-sm text-muted-foreground mt-1">
+              <div className="space-y-2">
+                <p className="font-medium text-xl">Drag & drop your image here</p>
+                <p className="text-base text-muted-foreground">
                   or click to browse files
                 </p>
               </div>
-              <FileImage className="h-16 w-16 text-muted-foreground/50" />
+              <div className="bg-muted/30 px-4 py-2 rounded-full mt-2">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <FileImage className="h-4 w-4" />
+                  Supports JPEG, PNG, WebP and PDF
+                </p>
+              </div>
             </>
           )}
         </div>

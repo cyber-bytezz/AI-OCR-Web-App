@@ -1,0 +1,24 @@
+<svg width="200" height="50" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circular background for the icon -->
+  <circle cx="25" cy="25" r="20" fill="url(#gradient1)" />
+  
+  <!-- Document scan icon -->
+  <path d="M18 25C18 21.134 21.134 18 25 18C28.866 18 32 21.134 32 25C32 28.866 28.866 32 25 32C21.134 32 18 28.866 18 25ZM30 25C30 22.239 27.761 20 25 20C22.239 20 20 22.239 20 25C20 27.761 22.239 30 25 30C27.761 30 30 27.761 30 25Z" fill="white"/>
+  <path d="M25 16V18M25 32V34M16 25H18M32 25H34M19.222 19.222L20.636 20.636M29.364 29.364L30.778 30.778M19.222 30.778L20.636 29.364M29.364 20.636L30.778 19.222" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Text part -->
+  <text x="55" y="28" font-family="Arial, sans-serif" font-weight="bold" font-size="22" fill="url(#gradient2)">OCR AI</text>
+  <text x="55" y="40" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Document Intelligence</text>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="gradient1" x1="5" y1="5" x2="45" y2="45" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="55" y1="15" x2="150" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+</svg>
