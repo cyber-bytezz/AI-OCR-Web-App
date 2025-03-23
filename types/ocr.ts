@@ -2,6 +2,7 @@ export interface OCROptions {
   enhancePreprocessing: boolean;
   documentType: 'receipt' | 'document' | 'handwritten' | 'card';
   extractTables: boolean;
+  language?: 'english' | 'tamil' | 'auto';
 }
 
 export interface FileUploadProps {

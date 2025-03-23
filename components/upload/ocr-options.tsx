@@ -6,6 +6,7 @@ interface OCROptionsProps {
   documentType: OCROptions['documentType'];
   enhancePreprocessing: boolean;
   extractTables: boolean;
+  language: OCROptions['language'];
   onOptionsChange: (options: OCROptions) => void;
   isLoading: boolean;
 }
@@ -14,42 +15,29 @@ export function OCROptionsForm({
   documentType,
   enhancePreprocessing,
   extractTables,
+  language,
   onOptionsChange,
   isLoading
 }: OCROptionsProps) {
-  const handleDocumentTypeChange = (value: OCROptions['documentType']) => {
-    onOptionsChange({
-      documentType: value,
-      enhancePreprocessing,
-      extractTables
-    });
-  };
 
-  const handleEnhanceChange = (value: boolean) => {
-    onOptionsChange({
-      documentType,
-      enhancePreprocessing: value,
-      extractTables
-    });
-  };
-
-  const handleTablesChange = (value: boolean) => {
+  const handleChange = (updatedOptions: Partial<OCROptions>) => {
     onOptionsChange({
       documentType,
       enhancePreprocessing,
-      extractTables: value
+      extractTables,
+      language,
+      ...updatedOptions
     });
   };
 
   return (
     <div className="w-full max-w-xs space-y-5 mb-6">
       <div className="space-y-2">
-        <label htmlFor="docType" className="text-sm font-medium text-muted-foreground">Document Type</label>
+        <label className="text-sm font-medium text-muted-foreground">Document Type</label>
         <select
-          id="docType"
-          className="w-full p-2.5 border border-input rounded-lg bg-background/50 shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary/30 outline-none transition-all duration-200"
+          className="w-full p-2.5 border border-input rounded-lg"
           value={documentType}
-          onChange={(e) => handleDocumentTypeChange(e.target.value as OCROptions['documentType'])}
+          onChange={(e) => handleChange({ documentType: e.target.value as OCROptions['documentType'] })}
           disabled={isLoading}
         >
           <option value="document">General Document</option>
@@ -58,31 +46,40 @@ export function OCROptionsForm({
           <option value="card">Card/ID</option>
         </select>
       </div>
-      
-      <div className="space-y-4">
-        <div className="flex items-center gap-3 bg-muted/30 p-3 rounded-lg hover:bg-muted/50 transition-colors duration-200">
-          <input
-            type="checkbox"
-            id="enhance"
-            checked={enhancePreprocessing}
-            onChange={(e) => handleEnhanceChange(e.target.checked)}
-            disabled={isLoading}
-            className="rounded border-primary/30 text-primary h-4 w-4 focus:ring-primary/20"
-          />
-          <label htmlFor="enhance" className="text-sm font-medium cursor-pointer select-none">Enhance Image Quality</label>
-        </div>
-        
-        <div className="flex items-center gap-3 bg-muted/30 p-3 rounded-lg hover:bg-muted/50 transition-colors duration-200">
-          <input
-            type="checkbox"
-            id="tables"
-            checked={extractTables}
-            onChange={(e) => handleTablesChange(e.target.checked)}
-            disabled={isLoading}
-            className="rounded border-primary/30 text-primary h-4 w-4 focus:ring-primary/20"
-          />
-          <label htmlFor="tables" className="text-sm font-medium cursor-pointer select-none">Extract Tables</label>
-        </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">OCR Language</label>
+        <select
+          className="w-full p-2.5 border border-input rounded-lg"
+          value={language}
+          onChange={(e) => handleChange({ language: e.target.value as OCROptions['language'] })}
+          disabled={isLoading}
+        >
+          <option value="english">English/General OCR</option>
+          <option value="tamil">Tamil OCR</option>
+        </select>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={enhancePreprocessing}
+          onChange={(e) => handleChange({ enhancePreprocessing: e.target.checked })}
+          disabled={isLoading}
+          className="rounded"
+        />
+        <label className="text-sm font-medium">Enhance Image Quality</label>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          checked={extractTables}
+          onChange={(e) => handleChange({ extractTables: e.target.checked })}
+          disabled={isLoading}
+          className="rounded"
+        />
+        <label className="text-sm font-medium">Extract Tables</label>
       </div>
     </div>
   );

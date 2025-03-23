@@ -2,9 +2,7 @@
 
 
 import { Header } from "@/components/header";
-import { Features, Demo, HowItWorks, Testimonials, Footer, CTA } from "@/components/landing";
-import { HeroSection } from "@/components/hero-section";
-import { ArrowRight } from "lucide-react";
+import { Features, Demo, HowItWorks, Testimonials, Footer, CTA, Hero } from "@/components/landing";
 import { Zap, Shield, BarChart } from "lucide-react";
 
 const features = [
@@ -63,35 +61,7 @@ export default function Landing() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
-        <HeroSection 
-          title="Transform Images into Text with AI"
-          description="Our advanced OCR technology extracts text from images, receipts, and documents with incredible accuracy."
-          badge={{
-            text: "New Feature:",
-            action: {
-              text: "Table Extraction",
-              href: "#features"
-            }
-          }}
-          actions={[
-            {
-              text: "Get Started",
-              href: "/ocr-tool",
-              icon: <ArrowRight className="h-4 w-4" />,
-              variant: "default"
-            },
-            {
-              text: "Learn More",
-              href: "#features",
-              variant: "glow"
-            }
-          ]}
-          image={{
-            light: "/hero.webp",
-            dark: "/hero.webp",
-            alt: "OCR Document Example"
-          }}
-        />
+        <Hero />
         <Features features={features} />
         <CTA />
         <Demo documentTypes={documentTypes} />

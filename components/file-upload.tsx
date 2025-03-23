@@ -17,11 +17,13 @@ export function FileUpload({ onFileSelect, isLoading }: FileUploadProps) {
   const [documentType, setDocumentType] = useState<OCROptions['documentType']>('document');
   const [enhancePreprocessing, setEnhancePreprocessing] = useState(false);
   const [extractTables, setExtractTables] = useState(false);
+  const [language, setLanguage] = useState<OCROptions['language']>('english');
 
   const handleOptionsChange = (options: OCROptions) => {
     setDocumentType(options.documentType);
     setEnhancePreprocessing(options.enhancePreprocessing);
     setExtractTables(options.extractTables);
+    setLanguage(options.language);
   };
 
   const onDrop = useCallback(
@@ -30,15 +32,16 @@ export function FileUpload({ onFileSelect, isLoading }: FileUploadProps) {
       if (file) {
         const previewUrl = URL.createObjectURL(file);
         setPreview(previewUrl);
-        
+
         onFileSelect(file, {
           documentType,
           enhancePreprocessing,
-          extractTables
+          extractTables,
+          language
         });
       }
     },
-    [onFileSelect, documentType, enhancePreprocessing, extractTables]
+    [onFileSelect, documentType, enhancePreprocessing, extractTables, language]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -51,20 +54,24 @@ export function FileUpload({ onFileSelect, isLoading }: FileUploadProps) {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-6">
+      {/* Move OCROptionsForm OUTSIDE dropzone */}
+      <OCROptionsForm
+        documentType={documentType}
+        enhancePreprocessing={enhancePreprocessing}
+        extractTables={extractTables}
+        language={language}
+        onOptionsChange={handleOptionsChange}
+        isLoading={isLoading}
+      />
+
+      {/* Dropzone UI */}
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-xl p-8 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md ${isDragActive ? "border-primary bg-primary/10 scale-[1.01]" : "border-primary/20 hover:border-primary/40 hover:bg-muted/20"} ${isLoading ? "opacity-80 cursor-not-allowed" : ""}`}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center gap-6 text-center">
-          <OCROptionsForm
-            documentType={documentType}
-            enhancePreprocessing={enhancePreprocessing}
-            extractTables={extractTables}
-            onOptionsChange={handleOptionsChange}
-            isLoading={isLoading}
-          />
           <ImagePreview
             preview={preview}
             onClear={() => setPreview(null)}
