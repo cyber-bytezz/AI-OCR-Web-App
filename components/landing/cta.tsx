@@ -28,7 +28,7 @@ export function CTA() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="pt-4"
           >
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" asChild>
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 px-5 py-2.5 h-auto text-sm" asChild>
               <Link href="/ocr-tool">
                 Try It Now <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
