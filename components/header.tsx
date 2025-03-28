@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileImage, Menu, X, Scan, FileText, ChevronDown, Zap, Globe, Sparkles } from "lucide-react";
+import { Menu, X, Scan, Zap, Globe, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";

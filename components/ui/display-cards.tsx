@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Sparkles, Shield, BarChart } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface DisplayCardProps {
   className?: string;
@@ -9,7 +9,6 @@ interface DisplayCardProps {
   title?: string;
   description?: string;
   date?: string;
-  iconClassName?: string;
   titleClassName?: string;
 }
 
@@ -19,7 +18,6 @@ function DisplayCard({
   title = "Featured",
   description = "Discover amazing content",
   date = "Just now",
-  iconClassName = "text-blue-500",
   titleClassName = "text-blue-500",
 }: DisplayCardProps) {
   return (
@@ -46,9 +44,6 @@ interface DisplayCardsProps {
 }
 
 export default function DisplayCards({ cards }: DisplayCardsProps) {
-  // Define responsive classes for different screen sizes
-  const mobileClasses = "sm:hidden";
-  const desktopClasses = "hidden sm:block";
   
   const defaultCards = [
     {
@@ -57,7 +52,6 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
       description: "Extract text from images in seconds with our advanced AI-powered OCR technology",
       date: "Active",
       icon: <Sparkles className="size-5 text-blue-300" />,
-      iconClassName: "text-blue-500",
       titleClassName: "text-blue-500"
     },
     {
@@ -66,7 +60,6 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
       description: "Your documents are processed securely and never stored without your permission",
       date: "Featured",
       icon: <span className="relative inline-block rounded-full bg-slate-800 p-1.5 shadow-inner flex-shrink-0">🛡️</span>,
-      iconClassName: "text-slate-500",
       titleClassName: "text-slate-500"
     },
     {
@@ -75,7 +68,6 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
       description: "Automatically detect and extract structured data from receipts, IDs, and more",
       date: "Coming Soon",
       icon: <span className="relative inline-block rounded-full bg-purple-800 p-1.5 shadow-inner flex-shrink-0">📊</span>,
-      iconClassName: "text-purple-500",
       titleClassName: "text-purple-500"
     },
   ];
@@ -90,7 +82,7 @@ export default function DisplayCards({ cards }: DisplayCardsProps) {
           // Create a modified version of props for mobile view
           const mobileProps = {
             ...cardProps,
-            className: cardProps.className.replace(/translate-[xy]-\d+|hover:translate-[xy]-\d+/g, '') + ' fade-in-50 duration-500'
+            className: (cardProps.className?.replace(/translate-[xy]-\d+|hover:translate-[xy]-\d+/g, '') || '') + ' fade-in-50 duration-500'
           };
           return <DisplayCard key={`mobile-${index}`} {...mobileProps} />;
         })}
