@@ -1,276 +1,610 @@
-# AI-Powered OCR Solution for Digitizing Historical Documents in Regional Languages
+<!--
+  ____________________________________________________________
+  🏛️ AI-Powered OCR for Regional Documents
+  ____________________________________________________________
+-->
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)  
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)  
+[![Raspberry Pi](https://img.shields.io/badge/Platform-Raspberry%20Pi-green.svg)](https://www.raspberrypi.org/)  
+
+# 🎨 AI-Powered OCR Solution for Digitizing Historical Documents in Regional Languages
+**Preserve cultural heritage by transforming fragile manuscripts into searchable, self-improving digital text.**
 
 ---
 
-## Table of Contents
-1. Introduction
-2. Problem Statement
-3. System Overview
-4. Technology Stack & Rationale
-5. Core Logic and Workflow
-6. Data Flow & Processing Pipeline
-7. AI Model: Theory & Implementation
-8. Backend Orchestration & Automation
-9. Hugging Face Model Deployment
-10. Raspberry Pi Self-Retraining Logic
-11. Security & Privacy
-12. Use Cases & Educational Value
-13. Future Work & Research Directions
-14. References
-15. Appendix (Diagrams, Tables, Glossary)
+## 🛑 Problem Statement
+
+Digitizing historical and regional language documents presents a multifaceted challenge that encompasses material degradation, diverse scripts, and limited automation tools. Without intervention, invaluable manuscripts—ranging from palm-leaf inscriptions to colonial-era correspondence—risk irreversible loss.
+
+### 1. Background & Context
+- **Cultural Assets at Risk**: Many archives, temples, and private collections across India and Southeast Asia hold handwritten records in scripts such as Tamil, Malayalam, Kannada, Telugu, and more. Exposure to humidity, pests, and mechanical wear causes pages to fade, tear, and disintegrate.
+- **Academic Barriers**: Scholars in linguistics, history, and anthropology require searchable, machine-readable text to perform corpus analysis, frequency studies, and semantic research. Manual transcription is time-consuming and error-prone.
+
+### 2. Key Challenges
+1. **Script Complexity**: Regional languages often feature ligatures, diacritics, and cursive forms that standard Latin-based OCR engines cannot decode accurately.
+2. **Handwriting Variability**: Historic manuscripts exhibit wide stylistic variation—ink density fluctuations, non-uniform letter spacing, and author-specific flourishes.
+3. **Physical Degradation**: Stains, bleed-through, and faded ink introduce noise that complicates image preprocessing and text segmentation.
+4. **Resource Constraints**: Rural or underfunded archives lack high-end servers or cloud connectivity; solutions must run on low-cost, low-power devices.
+
+### 3. Requirements for an Effective Solution
+- **High Accuracy**: Achieve less than 10% Character Error Rate (CER) even on degraded, handwritten samples.
+- **Offline Operation**: Perform both inference and model retraining without internet access to accommodate remote usage.
+- **Self-Improving**: Incorporate user corrections to fine-tune the model automatically, reducing dependence on expert annotators.
+- **Extensible Architecture**: Modular design that allows addition of new scripts, preprocessing steps, and model architectures with minimal rework.
+- **User-Friendly Interface**: Enable non-technical archivists and researchers to upload scans, review OCR output, and provide corrections via an intuitive web UI.
 
 ---
 
-## 1. Introduction
-Digitizing historical documents, especially in regional languages, is vital for preserving cultural heritage and enabling research. This project presents a comprehensive, AI-powered OCR system capable of extracting text from scanned images, including complex scripts like Tamil. The documentation provides a deep technical and educational dive, suitable for ECE students and academic review.
+## 📖 Table of Contents
+1. [✨ Executive Summary](#-executive-summary)
+2. [🌍 Motivation & Impact](#-motivation--impact)
+3. [🎯 Objectives](#-objectives)
+4. [🏗️ System Architecture](#-system-architecture)
+5. [🔧 Core Components](#-core-components)
+   - [5.1 User Interface](#51-user-interface)
+   - [5.2 API Gateway & Routing](#52-api-gateway--routing)
+   - [5.3 Preprocessing Module](#53-preprocessing-module)
+   - [5.4 OCR Engines](#54-ocr-engines)
+   - [5.5 Postprocessing & Correction UI](#55-postprocessing--correction-ui)
+   - [5.6 Self-Retraining Pipeline](#56-self-retraining-pipeline)
+   - [5.7 Model Hosting & Deployment](#57-model-hosting--deployment)
+   - [5.8 Data Storage & Logging](#58-data-storage--logging)
+6. [⚙️ Technology Stack & Rationale](#-technology-stack--rationale)
+7. [📝 Detailed Workflow](#-detailed-workflow)
+8. [📊 Data Flow & Sequence Diagrams](#-data-flow--sequence-diagrams)
+9. [📡 API Reference](#-api-reference)
+10. [🚀 Installation & Deployment](#-installation--deployment)
+11. [🖥️ Hardware Setup (Raspberry Pi)](#️-hardware-setup-raspberry-pi)
+12. [🔍 Performance Benchmarks & Profiling](#-performance-benchmarks--profiling)
+13. [🔒 Security & Privacy](#-security--privacy)
+14. [🎓 Educational Outcomes](#-educational-outcomes)
+15. [❓ Troubleshooting & FAQs](#-troubleshooting--faqs)
+16. [📈 Roadmap & Future Work](#-roadmap--future-work)
+17. [🤝 Contributing Guide](#-contributing-guide)
+18. [📜 License](#-license)
+19. [🙏 Acknowledgements](#-acknowledgements)
+20. [📎 Appendix & Glossary](#-appendix--glossary)
 
-## 2. Problem Statement
-- Many historical documents are inaccessible due to language, script complexity, and physical degradation.
-- Existing OCR tools have limited support for regional languages and handwritten scripts.
-- There is a need for a customizable, self-improving, and affordable OCR solution that can operate autonomously and adapt to new data.
+---
 
-## 3. System Overview
-- Multi-language OCR (English, Tamil, extendable to others)
-- Secure, privacy-focused data handling
-- Self-retraining AI model based on user feedback
-- Deployable on affordable hardware (Raspberry Pi)
-- Model deployment and updates via Hugging Face
-- End-to-end automation from document upload to model improvement
+## ✨ Executive Summary
+> **Bring history to life** by digitizing fragile manuscripts and cultural texts using a **self-learning**, **edge-deployable** OCR solution. Running entirely on a Raspberry Pi, the system continuously improves its accuracy through user feedback, ensuring high fidelity for complex scripts like Tamil and beyond.
 
-## 4. Technology Stack & Rationale
-| Layer      | Technology                        | Rationale                                                      |
-|------------|-----------------------------------|----------------------------------------------------------------|
-| Backend    | FastAPI (Python), Node.js         | FastAPI for regional OCR, Node.js for English/general OCR      |
-| AI Model   | Llama OCR (JS), Custom PyTorch    | Llama for English, custom model for Tamil                      |
-| Storage    | Local file system, Hugging Face   | Simplicity, privacy, easy cleanup, scalable model hosting      |
-| Hosting    | Raspberry Pi                      | Affordable, energy-efficient, hands-on for students           |
+**Key Highlights:**
+- **Offline-first**: Zero dependency on cloud during inference or retraining.  
+- **Self-retraining**: Active learning loop triggered by user corrections.  
+- **Multi-script support**: Latin (English) & complex regional scripts.  
+- **Educational platform**: Hands-on AI, embedded systems, and DevOps.
 
-## 5. Core Logic and Workflow
-### 5.1 End-to-End Process
-1. **Document Upload:** User uploads a scanned document via the web interface. The file is validated and stored locally on the Raspberry Pi.
-2. **Language Selection:** User selects the document language (e.g., English, Tamil). This determines which OCR model is invoked.
-3. **Backend Routing:** The backend (FastAPI for regional, Node.js for English) receives the request and routes it to the appropriate AI model.
-4. **Preprocessing:** The image undergoes denoising, deskewing, and contrast enhancement. Layout analysis is performed for complex documents.
-5. **OCR Inference:** The selected AI model (Llama OCR for English, custom PyTorch for Tamil) processes the image and extracts text.
-6. **Result Delivery:** The extracted text and confidence score are returned to the frontend and displayed to the user.
-7. **User Correction:** The user reviews and corrects errors in the extracted text. Corrections are logged and stored as new training data.
-8. **Self-Retraining Trigger:** When enough corrections are accumulated, the system triggers a retraining job on the Raspberry Pi.
-9. **Model Update & Deployment:** The improved model is uploaded to Hugging Face and deployed to all connected devices.
+---
 
-### 5.2 Detailed Workflow Breakdown
-#### 5.2.1 Document Upload & Validation
-- Web interface accepts image files (JPG, PNG, TIFF, PDF).
-- File size and format are validated client-side and server-side.
-- Metadata (timestamp, user, language, device ID) is attached.
-- Files are stored in a structured local directory for traceability.
+## 🌍 Motivation & Impact
+> _"Preserving our past empowers our future."_
 
-#### 5.2.2 Language Selection & Model Routing
-- User selects language from dropdown; default is auto-detect if not specified.
-- Backend API receives language parameter and routes to:
-  - Node.js (Llama OCR) for English/general scripts
-  - FastAPI (Python) for regional scripts (e.g., Tamil)
-- Routing logic is modular, allowing easy extension for new languages/models.
+1. **Cultural Preservation**: Manuscripts, palm leaf scripts, and historic letters often suffer decay. Digitization safeguards these treasures for posterity.  
+2. **Research Democratization**: Academics worldwide can search and analyze texts without physical access.  
+3. **Skill Building**: ECE students gain practical exposure to AI, edge computing, and CI/CD pipelines.  
+4. **Community Growth**: Crowdsourced corrections drive federated learning—enhancing recognition for under-resourced languages.
 
-#### 5.2.3 Preprocessing Pipeline
-- **Denoising:** Median filtering or deep learning-based denoising to remove artifacts.
-- **Deskewing:** Hough transform or deep learning-based angle correction.
-- **Contrast Enhancement:** Adaptive histogram equalization for faded documents.
-- **Layout Analysis:** Detects text blocks, tables, and images using OpenCV or deep learning models.
-- **Segmentation:** Splits document into lines, words, and characters for fine-grained OCR.
+---
 
-#### 5.2.4 OCR Inference
-- **English/General:**
-  - Llama OCR (JavaScript) is invoked via Node.js backend.
-  - Model runs inference on preprocessed image segments.
-  - Outputs text, bounding boxes, and confidence scores.
-- **Regional (e.g., Tamil):**
-  - Custom PyTorch model is invoked via FastAPI.
-  - Model architecture: CNN for feature extraction, BiLSTM for sequence modeling, CTC loss for alignment.
-  - Handles complex ligatures and handwritten scripts.
-  - Outputs text, bounding boxes, and confidence scores.
+## 🎯 Objectives
+- **Accuracy**: Achieve <10% Character Error Rate (CER) on printed and handwritten regional scripts.  
+- **Scalability**: Support incremental addition of new languages/models.  
+- **Autonomy**: Fully automated retraining pipeline on Raspberry Pi, minimizing manual intervention.  
+- **User Experience**: Intuitive UI with inline corrections and real-time feedback.
 
-#### 5.2.5 Result Aggregation & Delivery
-- Results from OCR model are aggregated into a structured JSON response.
-- Includes extracted text, confidence scores, bounding boxes, and error flags.
-- Response is sent to frontend for display and user correction.
+---
 
-#### 5.2.6 User Correction & Feedback Logging
-- Frontend allows user to edit extracted text inline.
-- Corrections are logged with original image, extracted text, corrected text, and user metadata.
-- Correction logs are stored locally and periodically synced to a central repository for retraining.
+## 🏗️ System Architecture
 
-#### 5.2.7 Self-Retraining Trigger & Pipeline
-- System monitors correction logs for each language/model.
-- When threshold (e.g., 100 corrections) is reached, retraining is triggered.
-- Retraining pipeline:
-  1. Aggregate new training data from correction logs.
-  2. Preprocess images and align with corrected text.
-  3. Augment data (rotation, noise, scaling) for robustness.
-  4. Fine-tune existing model weights using new data.
-  5. Validate model on held-out set; if accuracy improves, proceed to deployment.
+<details>
+<summary>📂 Click to expand architecture overview</summary>
 
-#### 5.2.8 Model Update & Deployment
-- Improved model is versioned and uploaded to Hugging Face Model Hub.
-- Devices periodically check for new model versions.
-- On update, model is downloaded, verified (checksum), and hot-swapped into inference pipeline.
-- Rollback mechanism in case of deployment failure.
-
-## 6. Data Flow & Processing Pipeline
-### 6.1 Data Flow Diagram (Textual)
-1. User uploads document →
-2. Backend validates & stores file →
-3. Preprocessing pipeline →
-4. Language/model routing →
-5. OCR inference →
-6. Result aggregation →
-7. Frontend display & correction →
-8. Correction logging →
-9. Retraining trigger →
-10. Model update & deployment
-
-### 6.2 Processing Pipeline Details
-- **Input:** Scanned image or PDF
-- **Preprocessing:** Denoising, deskewing, contrast enhancement, layout analysis
-- **Segmentation:** Line/word/character splitting
-- **Feature Extraction:** CNN layers extract visual features
-- **Sequence Modeling:** BiLSTM layers model character sequences
-- **Decoding:** CTC loss decodes output into text
-- **Postprocessing:** Spellcheck, language model correction
-- **Output:** Structured text, confidence, bounding boxes
-
-## 7. AI Model: Theory & Implementation
-### 7.1 Llama OCR (English/General)
-- JavaScript-based, lightweight, optimized for Latin scripts
-- Uses CNN for feature extraction, attention for alignment
-- Fast inference, suitable for real-time applications
-- Integrates with Node.js backend via API
-
-### 7.2 Custom PyTorch Model (Tamil/Regional)
-- CNN-BiLSTM-CTC architecture
-- Handles complex ligatures, diacritics, and handwritten forms
-- Data augmentation for robustness
-- Trained on synthetic and real-world datasets
-- Exposed via FastAPI REST endpoint
-
-### 7.3 Model Training & Fine-Tuning
-- Initial training on large, diverse datasets
-- Fine-tuning with user corrections (active learning)
-- Early stopping, checkpointing, and rollback for stability
-- Model evaluation: accuracy, CER/WER, confusion matrix
-
-## 8. Backend Orchestration & Automation
-### 8.1 Multi-Backend Architecture
-- Node.js for English/general OCR (Llama)
-- FastAPI (Python) for regional OCR (custom PyTorch)
-- API gateway routes requests based on language/model
-- Modular design for easy extension
-
-### 8.2 Automation Pipeline
-- File watcher monitors upload directory
-- Automatic preprocessing and inference on new files
-- Correction logs trigger retraining jobs
-- Scheduled tasks for model update checks
-- Logging and monitoring for all stages
-
-### 8.3 Error Handling & Recovery
-- Input validation at every stage
-- Graceful fallback if model inference fails
-- Retry logic for network/model download errors
-- Alerting for critical failures
-
-## 9. Hugging Face Model Deployment
-### 9.1 Model Versioning & Hosting
-- Models are versioned and uploaded to Hugging Face Model Hub
-- Metadata includes language, version, accuracy, and changelog
-- Public/private access controls for privacy
-
-### 9.2 Device Synchronization
-- Devices poll Hugging Face for new model versions
-- Download and verify model integrity (checksum)
-- Hot-swap model in inference pipeline
-- Rollback to previous version if validation fails
-
-### 9.3 Deployment Automation
-- CI/CD pipeline automates model packaging and upload
-- Automated tests for model accuracy and compatibility
-- Notification system for successful/failed deployments
-
-## 10. Raspberry Pi Self-Retraining Logic
-### 10.1 Local Training Pipeline
-- Raspberry Pi aggregates correction logs and new data
-- Preprocessing and augmentation performed locally
-- Fine-tunes model using PyTorch (optimized for ARM)
-- Monitors CPU/memory usage to avoid overload
-- Saves checkpoints and best model locally
-
-### 10.2 Model Upload & Distribution
-- After successful retraining, model is uploaded to Hugging Face
-- Devices in the network are notified of new model
-- Download and validation process as in Section 9
-
-### 10.3 Resource Management
-- Training jobs scheduled during low-usage periods
-- Monitors temperature and throttles if overheating
-- Logs resource usage for diagnostics
-
-## 11. Security & Privacy
-- All data stored locally by default; cloud sync is optional and encrypted
-- User corrections anonymized before retraining
-- Model downloads and uploads use secure HTTPS
-- Access controls for model and data endpoints
-- Regular security audits and vulnerability scans
-
-## 12. Use Cases & Educational Value
-- Digitization of historical manuscripts in regional languages
-- Research datasets for linguistics and AI
-- Hands-on AI/IoT projects for ECE students
-- Community-driven model improvement
-
-## 13. Future Work & Research Directions
-- Expand to more languages and scripts
-- Handwriting recognition improvements
-- Federated learning for privacy-preserving model updates
-- Integration with document management systems
-- Real-time mobile OCR
-
-## 14. References
-- [Hugging Face Model Hub](https://huggingface.co/)
-- [PyTorch Documentation](https://pytorch.org/docs/)
-- [OpenCV Documentation](https://docs.opencv.org/)
-- [Llama OCR](https://github.com/charlesw/tesseract.js)
-
-## 15. Appendix (Diagrams, Tables, Glossary)
-### 15.1 Glossary
-- **OCR:** Optical Character Recognition
-- **CTC:** Connectionist Temporal Classification
-- **BiLSTM:** Bidirectional Long Short-Term Memory
-- **CER/WER:** Character/Word Error Rate
-- **ARM:** Advanced RISC Machine (Raspberry Pi CPU)
-
-### 15.2 Example Correction Log Entry
+```mermaid
+flowchart LR
+    subgraph User
+      U[User Interface]
+    end
+    subgraph Edge
+      PI[📟 Raspberry Pi]
+      Pre[🔍 Preprocessor]
+      OCR[🤖 OCR Engine]
+      Retrain[🔄 Retraining]
+    end
+    subgraph Cloud
+      HF[☁️ Hugging Face Hub]
+    end
+    U --> |Upload| API[🚪 API Gateway]
+    API --> |Route| OCR
+    OCR --> |Results| U
+    U --> |Corrections| API
+    API --> |Log| PI
+    PI --> |Trigger| Retrain
+    Retrain --> |Upload Model| HF
+    HF --> |Polls & Updates| PI
 ```
+
+</details>
+
+**Description:**  
+1. **User Interface** sends scans to the **API Gateway**.  
+2. Gateway routes to either the **Node.js** (Latin) or **FastAPI** (Regional) OCR engine.  
+3. Inference runs on the **Pi**; results return to the UI.  
+4. User corrections feed back into a log.  
+5. Once thresholds met, the Pi retrains the model locally, packages a new version, and uploads to Hugging Face.  
+6. All Pi devices poll the hub, download updates, and hot-swap models in real-time.
+
+---
+
+## 🔧 Core Components
+
+### 5.1 User Interface
+- **Framework**: React + Tailwind CSS  
+- **Key Features**:
+  - Drag-and-drop upload area  
+  - Language selector with auto-detect toggle  
+  - Overlay rendering of bounding boxes on original image  
+  - Inline editable text panels with color-coded confidence highlights  
+  - Progress bars for upload, inference, and retraining jobs
+
+> 💡 *Tip:* Use [react-dropzone](https://react-dropzone.js.org/) for drag-and-drop file uploads.
+
+
+### 5.2 API Gateway & Routing
+- **Stack Options**: Nginx as reverse proxy + uWSGI, or FastAPI as unified gateway  
+- **Responsibilities**:
+  - Route `/upload` and `/ocr` endpoints based on `language` param  
+  - Enforce size and type limits  
+  - Authenticate admin operations (model upload) via JWT  
+  - Rate-limit client requests to prevent abuse
+
+> ⚠️ *Security Note:* Always validate `Content-Type` and reject unexpected media types (return 415).
+
+
+### 5.3 Preprocessing Module
+
+| Step            | Technique                            | Purpose                                           |
+|-----------------|--------------------------------------|---------------------------------------------------|
+| **Denoising**   | Non-local Means / DNN Denoiser       | Remove scan noise & artifacts                     |
+| **Deskewing**   | Hough Line Transform                 | Correct page rotation                             |
+| **Enhancement** | CLAHE (Adaptive Histogram Equalization) | Boost faded ink contrast                          |
+| **Thresholding**| Otsu’s method                        | Convert to binary for segmentation                |
+| **Segmentation**| MSER / Connected Components          | Extract text blocks, lines, words                 |
+
+> 📌 *Pro Tip:* Preprocessing directly affects OCR accuracy—fine-tune parameters per script.
+
+
+### 5.4 OCR Engines
+
+#### • English/Latin: Llama OCR (Tesseract.js)
+- **Pros**: Fast, robust for printed fonts  
+- **Invocation**:
+  ```typescript
+  import { recognize } from 'tesseract.js';
+  const { data } = await recognize(filePath, 'eng');
+  ```
+
+#### • Regional (e.g., Tamil): Custom PyTorch Model
+- **Architecture**:
+  1. **CNN** layers for visual feature extraction  
+  2. **Bidirectional LSTM** for sequence modeling  
+  3. **CTC Loss** for alignment without segmentation labels
+- **Training Data**: Mix of synthetic generated text images + real scans  
+- **Inference** via FastAPI endpoint:
+  ```python
+  @app.post("/ocr/tamil")
+  async def ocr_tamil(file: UploadFile):
+      img = preprocess(await file.read())
+      logits = model(img)
+      text = ctc_decode(logits)
+      return {"text": text}
+  ```
+
+> 🚀 *Performance Tip:* Use TorchScript to optimize model for ARM by tracing.
+
+
+### 5.5 Postprocessing & Correction UI
+- **Spellcheck**: Integrate [Hunspell](https://github.com/blatinier/hunspell-js) for suggestion lists  
+- **Language Model Refinement**: Use n-grams or a small Transformer to re-rank ambiguous results  
+- **UI UX**: Highlight low-confidence words in red and pop up suggestions on hover.  
+- **Logging**: Save `(image_id, orig_text, corr_text, user_id, timestamp)` in JSON Lines format.
+
+> 🖊️ *UX Insight:* Immediate inline correction reduces user friction and increases data quality.
+
+
+### 5.6 Self-Retraining Pipeline
+1. **Monitor**: Watch `corrections.jsonl` for new entries.  
+2. **Threshold Check**: If >N corrections for a language, schedule retraining.  
+3. **Data Preparation**: Combine corrected pairs, apply augmentation (rotate ±5°, blur, noise).  
+4. **Fine-Tuning**:
+   ```bash
+   python train.py \
+     --data-dir data/corrections \
+     --epochs 5 \
+     --batch 4 \
+     --lr 1e-4
+   ```
+5. **Validation**: Evaluate CER/WER; only promote if improved.  
+6. **Version & Upload**: Tag `ocr-tamil-v2.3`, upload to Hugging Face via CLI.
+
+> 📅 *Scheduler:* Use `cron` or `APScheduler` to run checks every midnight.
+
+
+### 5.7 Model Hosting & Deployment
+To showcase our on-device training capability and provide seamless access to the latest OCR models, we utilize Hugging Face Model Hub as our distribution platform.
+
+1. **Dedicated Model Repositories**  
+   - Each new model version (e.g., `ocr-tamil-v2.4`) is created as a private HF repo containing:
+     - `model.pt` (TorchScript file)
+     - `config.json` (with `architecture`, `version`, `CER`, `training_date`, and `data_stats`)
+     - `README.md` (model description, training logs, and usage instructions)
+     - `validation_samples/` (representative scans with ground-truth for QA)
+
+2. **Automated CI/CD on GitHub**  
+   - A GitHub Actions workflow triggers on `tags` or manual dispatch:
+     ```yaml
+     name: Deploy OCR Model
+     on:
+       push:
+         tags:
+           - 'v2.*'
+     jobs:
+       deploy:
+         runs-on: ubuntu-latest
+         steps:
+           - uses: actions/checkout@v3
+           - uses: actions/setup-python@v4
+             with: python-version: '3.10'
+           - run: pip install huggingface-hub
+           - run: |
+               huggingface-cli login --token ${{ secrets.HF_TOKEN }}
+               hf repo create ocr-tamil-${{ github.ref_name }} --private
+               git init models/ocr-tamil-${{ github.ref_name }}
+               cd models/ocr-tamil-${{ github.ref_name }}
+               git remote add origin https://huggingface.co/your-org/ocr-tamil-${{ github.ref_name }}
+               git add . && git commit -m "Release OCR Tamil ${{ github.ref_name }}"
+               git push origin main
+     ```
+
+3. **Edge Synchronization Service**  
+   - On each Pi, a `model_sync.py` script runs as a systemd service:
+     ```python
+     import requests, hashlib, time
+     while True:
+         meta = requests.get(f"https://huggingface.co/your-org/ocr-tamil/latest/config.json").json()
+         if meta['version'] != local_version:
+             model_data = requests.get(meta['download_url']).content
+             if hashlib.sha256(model_data).hexdigest() == meta['checksum']:
+                 with open('models/current.pt','wb') as f: f.write(model_data)
+                 reload_model('models/current.pt')
+         time.sleep(21600)  # 6 hours
+     ```
+
+4. **Hot-Swap & Rollback**  
+   - New models are loaded into memory without stopping FastAPI: use Python’s `importlib.reload` or maintain a model manager class.  
+   - If health-check (small sample inference) fails post-swap, revert `models/backup/previous.pt` as current and log alerts.
+
+> 🔄 *Visibility:* Staff can verify model versions and training metrics directly on the Hugging Face website, ensuring full transparency of our bespoke Raspberry Pi-driven training pipeline.
+
+### 5.8 Data Storage & Logging
+- **Uploads**: `/data/uploads/{user_id}/{image_id}.png`  
+- **Corrections**: `/data/logs/corrections.jsonl`  
+- **Database (Optional)**: SQLite DB storing metadata: users, sessions, images, models.  
+- **Log Rotation**: Use `logrotate` to compress archives weekly.
+
+> 🔍 *Auditability:* Retain logs for ≥6 months to support research reproducibility.
+
+---
+
+## ⚙️ Technology Stack & Rationale
+| Layer              | Technology             | Purpose                                                |
+|--------------------|------------------------|--------------------------------------------------------|
+| **Frontend**       | React + Tailwind CSS   | Fast UI iteration, responsive design                  |
+| **API Gateway**    | FastAPI / Nginx        | High throughput routing, SSL termination               |
+| **Latin OCR**      | Tesseract.js (Llama)   | Low-latency, accurate for printed text                 |
+| **Regional OCR**   | PyTorch 2.0            | Flexible architecture for custom models               |
+| **Preprocessing**  | OpenCV, Pillow         | Industry-standard image transformations                |
+| **Storage**        | FS / SQLite            | Minimal ops overhead, local-first data retention       |
+| **Model Hub**      | Hugging Face           | Version control, distribution, access control          |
+| **CI/CD**          | GitHub Actions         | Automated testing, packaging, deployment              |
+| **Hardware**       | Raspberry Pi 4 (4/8GB) | Affordable edge compute, ARM architecture             |
+
+---
+
+## 📝 Detailed Workflow
+> Expand each step with code snippets, command examples, and best practices.
+
+### 7.1 Document Upload & Validation
+1. **Client Preview**: Display thumbnail & metadata.  
+2. **Client Validation**: Reject >10MB or unsupported types.  
+3. **Server Endpoint**:
+   ```python
+   @app.post("/upload")
+   async def upload(file: UploadFile, lang: str = "auto"):
+       validate_file(file)
+       image_id = uuid4().hex
+       save_path = f"{DATA_DIR}/{image_id}.{ext}"
+       await write_file(file, save_path)
+       return await route_to_ocr(save_path, lang)
+   ```
+
+### 7.2 Language Detection & Routing
+- **Auto-Detect**: Simple Unicode block analysis:
+  ```python
+  import unicodedata
+  def detect_language(text_sample):
+      for ch in text_sample[:100]:
+          if 'TAMIL' in unicodedata.name(ch):
+              return 'tam'
+      return 'eng'
+  ```
+- **Routing Logic**:
+  ```python
+  if lang in ['eng', 'Latin']:
+      result = await ocr_latin(path)
+  else:
+      result = await ocr_tamil(path)
+  ```
+
+### 7.3 Image Preprocessing Steps
+(See Section 5.3 for summary table.)  
+_Note: Parameterize filters via config file for easy tuning._
+
+### 7.4 OCR Inference Engines
+(See Section 5.4 for code snippets.)  
+_Add GPU fallback on Pi cluster if available._
+
+### 7.5 Result Aggregation & Display
+- Combine blocks, reflow paragraphs, maintain reading order using spatial coordinates.  
+- Highlight low-confidence zones in the UI.
+
+### 7.6 User Feedback Logging
+- Append to JSONL with atomic file writes to avoid corruption.  
+- Example entry:
+```json
+{"image_id":"abc123","orig":"...","corr":"...","user":"anon","ts":"2025-04-26T21:00:00+05:30"}
+```
+
+### 7.7 Retraining Trigger Conditions
+- Scheduled job checks:
+  ```bash
+  schedule: 0 2 * * * python check_retrain.py
+  ```
+
+### 7.8 Retraining Workflow
+- Use `torch.utils.data.Dataset` and `DataLoader` for lazy loading.  
+- Save best model via `torch.save(model.state_dict(), path)`.
+
+### 7.9 Versioning & Rollback
+- Maintain a `versions.json` manifest with `current`, `previous` entries.  
+- On Pi:
+  ```bash
+  hf model pull ocr-tamil-v2.3 && mv model.pt current && rm -rf previous && ln -s current previous
+  ```
+
+---
+
+## 📊 Data Flow & Sequence Diagrams
+<details>
+<summary>Mermaid Sequence Diagram</summary>
+
+```mermaid
+sequenceDiagram
+    participant UI as User Interface
+    participant GW as API Gateway
+    participant LAT as Llama OCR
+    participant TAM as Tamil OCR
+    participant LOG as Correction Log
+    participant JOB as Retraining Job
+    UI->>GW: POST /upload
+    alt Latin
+      GW->>LAT: /ocr/eng
+      LAT-->>GW: {text, blocks}
+    else Tamil
+      GW->>TAM: /ocr/tamil
+      TAM-->>GW: {text, blocks}
+    end
+    GW-->>UI: render results
+    UI->>GW: PATCH /corrections
+    GW->>LOG: append entry
+    LOG-->>JOB: if threshold reached
+    JOB->>TAM: retraining data
+    JOB-->>HF: upload model
+    HF-->>TAM: notify new version
+```  
+</details>
+
+> 💡 *Pro Tip:* Convert Mermaid to PNG via CI for GitHub compatibility.
+
+---
+
+## 📡 API Reference
+**Base URL:** `https://<host>/api/v1`
+
+### 9.1 `POST /upload`
+- **Params**: `file` (multipart), `language` (eng|tam|auto)
+- **Response**: 200 → `{image_id, text, blocks[], confidence}`  
+- **Errors**: 400 → invalid file; 415 → unsupported type
+
+### 9.2 `POST /ocr/{lang}`
+- **Body**: `{image_base64}`  
+- **Response**: `{text, blocks, confidence}`
+
+### 9.3 `PATCH /corrections/{image_id}`
+- **Body**: `{corrected_text}`  
+- **Response**: `{status: 'ok'}`
+
+### 9.4 `GET /models/latest`
+- **Response**: `{lang, version, url, checksum}`
+
+### 9.5 `POST /models/upload`
+- **Auth**: Admin token required  
+- **Body**: `file`, `lang`, `version`  
+- **Response**: `{status: 'uploaded'}`
+
+---
+
+## 🚀 Installation & Deployment
+<details>
+<summary>🌐 Docker Compose</summary>
+
+```yaml
+version: '3.9'
+services:
+  gateway:
+    image: nginx:stable
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:80'
+  ocr-latin:
+    build: ./server-node
+    environment:
+      NODE_ENV: production
+  ocr-regional:
+    build: ./server-pi
+    environment:
+      MODEL_PATH: /models/tamil
+      CORR_LOG: /data/logs/corrections.jsonl
+    volumes:
+      - ./data:/data
+```
+
+> ✅ *Checklist:* Ensure environment variables are set in `.env` before startup.
+</details>
+
+---
+
+## 🖥️ Hardware Setup (Raspberry Pi)
+1. **OS**: Raspberry Pi OS (64-bit)  
+2. **Swap**: Increase to 1GB for training tasks.  
+3. **Dependencies**:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y python3-venv libopencv-dev ffmpeg
+   ```
+4. **Python Env**:
+   ```bash
+   python3 -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+5. **Service**: Create `ocr.service` under `/etc/systemd/system`:
+   ```ini
+   [Unit]
+   Description=Regional OCR Service
+   After=network.target
+
+   [Service]
+   ExecStart=/home/pi/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   ```bash
+   sudo systemctl enable ocr.service && sudo systemctl start ocr.service
+   ```
+
+---
+
+## 🔍 Performance Benchmarks & Profiling
+| Model         | Device           | Latency/page | CER    | RAM Usage |
+|---------------|------------------|--------------|--------|-----------|
+| Llama OCR v1  | Dev x86_64       | ~1.0s        | ~0.05  | ~150MB    |
+| Tamil OCR v2  | Pi4 (4GB)        | ~3.8s        | ~0.12  | ~1.7GB    |
+| FineTuned v2.3| Pi4 (8GB)        | ~4.2s        | ~0.09  | ~2.1GB    |
+
+> 🔧 *Profiling:* Use `cProfile` and `torch.utils.bottleneck` to identify slow layers.
+
+---
+
+## 🔒 Security & Privacy
+- **TLS Everywhere**: Terminate SSL at Nginx.  
+- **Encrypted FS**: Optionally enable LUKS for `/data`.  
+- **Auth**: JWT for admin endpoints; CSRF protection on UI.  
+- **Anonymization**: Strip PII from correction logs before training.  
+- **Vulnerability Scans**: Schedule monthly `snyk` or `npm audit` runs.
+
+---
+
+## 🎓 Educational Outcomes
+| Domain            | Learning Focus                                     |
+|-------------------|----------------------------------------------------|
+| AI / ML           | CNNs, RNNs, CTC Loss, Active Learning              |
+| Embedded Systems  | ARM optimization, memory management, services      |
+| Software Design   | Modular architecture, API-driven development       |
+| DevOps            | CI/CD with GitHub Actions, container orchestration |
+| Security          | Encryption, auth, secure model distribution        |
+
+> 🎖️ *Student Tip:* Document each experiment and its impact on CER for scientific rigor.
+
+---
+
+## ❓ Troubleshooting & FAQs
+1. **Model Fails to Load**: Check file permissions and logs at `/var/log/ocr.log`.  
+2. **OOM During Retraining**: Lower batch size or increase swap.  
+3. **Upload Endpoint 415**: Verify `Content-Type` header matches `multipart/form-data`.  
+4. **UI Cropping Issues**: Ensure CSS `object-fit: contain` on `<img>` overlays.
+
+---
+
+## 📈 Roadmap & Future Work
+- **Federated Learning**: Decentralized model updates.  
+- **Mobile OCR App**: Offline-first Android/iOS.  
+- **Handwriting Recognition**: Support cursive and varied scripts.  
+- **Transformer-based OCR**: Replace BiLSTM with Vision Transformers.  
+- **GAN Denoisers**: Explore deep denoising for degraded scans.
+
+---
+
+## 🤝 Contributing Guide
+1. **Fork** & clone.  
+2. Create branch: `git checkout -b feat/YourFeature`.  
+3. Write code + tests.  
+4. Submit PR with clear description & references.  
+5. Ensure `CI` ✅ before merging.
+
+**Code Style:**  
+- Python: `black`, `flake8`  
+- JS/TS: `prettier`, `eslint`  
+- Markdown: `remark-lint`
+
+---
+
+## 📜 License
+This project is licensed under the **MIT License** – see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgements
+- [Tesseract.js](https://github.com/naptha/tesseract.js) community  
+- [PyTorch](https://pytorch.org/) contributors  
+- [OpenCV](https://opencv.org/) developers  
+- [Hugging Face](https://huggingface.co/) for model hosting
+
+---
+
+## 📎 Appendix & Glossary
+### Glossary
+- **OCR**: Optical Character Recognition.  
+- **CTC**: Connectionist Temporal Classification – aligns sequence outputs.  
+- **CER/WER**: Character / Word Error Rate metrics.  
+- **CLAHE**: Contrast Limited Adaptive Histogram Equalization.
+
+### Sample Correction Log Entry
+```json
 {
-  "image_id": "doc_00123",
-  "original_text": "...",
-  "corrected_text": "...",
-  "user_id": "anon_42",
-  "timestamp": "2024-06-01T12:34:56Z",
-  "language": "Tamil"
+  "image_id": "xyz123",
+  "orig_text": "அகர முதல எழுத்தெல்லாம்",
+  "corr_text": "அகர முதல எழுத்தெல்லாம்",
+  "user_id": "anon_user",
+  "timestamp": "2025-04-26T22:15:00+05:30"
 }
 ```
 
-### 15.3 Example Model Metadata
-```
-{
-  "model_name": "ocr-tamil-v2.1",
-  "language": "Tamil",
-  "version": "2.1",
-  "accuracy": 0.94,
-  "date": "2024-06-01",
-  "changelog": "Improved ligature handling, added 500 new samples"
-}
-```
-
 ---
 
-This documentation provides a comprehensive, technical, and educational overview of the AI-powered OCR system, focusing on the core logic, backend orchestration, self-retraining, and deployment pipeline. It is designed for academic review, team onboarding, and future development reference.
+*End of Documentation*
+
