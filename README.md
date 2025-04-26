@@ -1,198 +1,276 @@
-# AI OCR Web Application
-
-A full-featured, AI-powered Optical Character Recognition (OCR) web application built with Next.js and React. This documentation provides a deep, A-Z analysis of the architecture, logic, and usage of the application.
+# AI-Powered OCR Solution for Digitizing Historical Documents in Regional Languages
 
 ---
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Key Features & Logic](#key-features--logic)
-4. [Component Breakdown](#component-breakdown)
-5. [API Endpoints](#api-endpoints)
-6. [Data Flow](#data-flow)
-7. [Utilities & Types](#utilities--types)
-8. [Styling & UI](#styling--ui)
-9. [Deployment](#deployment)
-10. [Usage Examples](#usage-examples)
-11. [FAQ](#faq)
+1. Introduction
+2. Problem Statement
+3. System Overview
+4. Technology Stack & Rationale
+5. Core Logic and Workflow
+6. Data Flow & Processing Pipeline
+7. AI Model: Theory & Implementation
+8. Backend Orchestration & Automation
+9. Hugging Face Model Deployment
+10. Raspberry Pi Self-Retraining Logic
+11. Security & Privacy
+12. Use Cases & Educational Value
+13. Future Work & Research Directions
+14. References
+15. Appendix (Diagrams, Tables, Glossary)
 
 ---
 
-## Overview
-This application enables users to upload images or scans of documents (receipts, standard documents, handwritten notes, cards/IDs) and extract text using advanced AI models. It features a modern, responsive UI, privacy-focused document handling, and supports multiple document types and languages (English, Tamil).
+## 1. Introduction
+Digitizing historical documents, especially in regional languages, is vital for preserving cultural heritage and enabling research. This project presents a comprehensive, AI-powered OCR system capable of extracting text from scanned images, including complex scripts like Tamil. The documentation provides a deep technical and educational dive, suitable for ECE students and academic review.
 
----
+## 2. Problem Statement
+- Many historical documents are inaccessible due to language, script complexity, and physical degradation.
+- Existing OCR tools have limited support for regional languages and handwritten scripts.
+- There is a need for a customizable, self-improving, and affordable OCR solution that can operate autonomously and adapt to new data.
 
-## Architecture
-- **Frontend:** Next.js (App Router), React, TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Custom, reusable (Tabs, Cards, Buttons, etc.)
-- **Animation:** Framer Motion
-- **Icons:** Lucide React
-- **OCR Backend:** Llama OCR (JS) and FastAPI (Tamil OCR)
-- **File Storage:** Local (public/uploads)
-- **API:** Next.js API routes for upload and OCR
+## 3. System Overview
+- Multi-language OCR (English, Tamil, extendable to others)
+- Secure, privacy-focused data handling
+- Self-retraining AI model based on user feedback
+- Deployable on affordable hardware (Raspberry Pi)
+- Model deployment and updates via Hugging Face
+- End-to-end automation from document upload to model improvement
 
-### Folder Structure
-- `app/` - Main app pages, API routes, layout
-- `components/` - UI and logic components
-- `lib/` - Utilities and document policy
-- `types/` - TypeScript interfaces
-- `public/` - Static assets and uploaded files
+## 4. Technology Stack & Rationale
+| Layer      | Technology                        | Rationale                                                      |
+|------------|-----------------------------------|----------------------------------------------------------------|
+| Backend    | FastAPI (Python), Node.js         | FastAPI for regional OCR, Node.js for English/general OCR      |
+| AI Model   | Llama OCR (JS), Custom PyTorch    | Llama for English, custom model for Tamil                      |
+| Storage    | Local file system, Hugging Face   | Simplicity, privacy, easy cleanup, scalable model hosting      |
+| Hosting    | Raspberry Pi                      | Affordable, energy-efficient, hands-on for students           |
 
----
+## 5. Core Logic and Workflow
+### 5.1 End-to-End Process
+1. **Document Upload:** User uploads a scanned document via the web interface. The file is validated and stored locally on the Raspberry Pi.
+2. **Language Selection:** User selects the document language (e.g., English, Tamil). This determines which OCR model is invoked.
+3. **Backend Routing:** The backend (FastAPI for regional, Node.js for English) receives the request and routes it to the appropriate AI model.
+4. **Preprocessing:** The image undergoes denoising, deskewing, and contrast enhancement. Layout analysis is performed for complex documents.
+5. **OCR Inference:** The selected AI model (Llama OCR for English, custom PyTorch for Tamil) processes the image and extracts text.
+6. **Result Delivery:** The extracted text and confidence score are returned to the frontend and displayed to the user.
+7. **User Correction:** The user reviews and corrects errors in the extracted text. Corrections are logged and stored as new training data.
+8. **Self-Retraining Trigger:** When enough corrections are accumulated, the system triggers a retraining job on the Raspberry Pi.
+9. **Model Update & Deployment:** The improved model is uploaded to Hugging Face and deployed to all connected devices.
 
-## Key Features & Logic
-- **Document Upload:** Drag-and-drop or select files (JPEG, PNG, WebP, PDF). Files are validated and uploaded to `/public/uploads`.
-- **Multi-Type Support:** User selects document type (receipt, document, handwritten, card/ID) and language (English, Tamil). Options are passed to the OCR backend.
-- **AI-Powered OCR:**
-  - English/general OCR uses Llama OCR via JS API.
-  - Tamil OCR uses a FastAPI backend.
-  - Supports table extraction, layout preservation, and preprocessing (denoise, deskew, contrast).
-- **Results Display:** OCR results shown in Markdown, with options to copy or download. Tabs allow toggling between image, text, or both.
-- **Privacy & Security:** Documents are validated, sensitive data is detected/redacted, and files are auto-cleaned after 24 hours.
-- **Interactive Demos:** Landing page features demos for different document types.
+### 5.2 Detailed Workflow Breakdown
+#### 5.2.1 Document Upload & Validation
+- Web interface accepts image files (JPG, PNG, TIFF, PDF).
+- File size and format are validated client-side and server-side.
+- Metadata (timestamp, user, language, device ID) is attached.
+- Files are stored in a structured local directory for traceability.
 
----
+#### 5.2.2 Language Selection & Model Routing
+- User selects language from dropdown; default is auto-detect if not specified.
+- Backend API receives language parameter and routes to:
+  - Node.js (Llama OCR) for English/general scripts
+  - FastAPI (Python) for regional scripts (e.g., Tamil)
+- Routing logic is modular, allowing easy extension for new languages/models.
 
-## Component Breakdown
-### Main Pages
-- `app/page.tsx` - Entry point, renders Landing page.
-- `app/ocr-tool/page.tsx` - Main OCR tool interface (upload, options, results).
+#### 5.2.3 Preprocessing Pipeline
+- **Denoising:** Median filtering or deep learning-based denoising to remove artifacts.
+- **Deskewing:** Hough transform or deep learning-based angle correction.
+- **Contrast Enhancement:** Adaptive histogram equalization for faded documents.
+- **Layout Analysis:** Detects text blocks, tables, and images using OpenCV or deep learning models.
+- **Segmentation:** Splits document into lines, words, and characters for fine-grained OCR.
 
-### Core Components
-- **FileDropzone:** Handles drag-and-drop upload, file validation.
-- **FileUpload:** Combines dropzone, options form, and image preview.
-- **OCRResults:** Displays OCR output, copy/download actions, tabbed view.
-- **OCROptionsForm:** Lets user select document type, language, and options.
-- **ImagePreview:** Shows preview of uploaded image.
-- **Header, Container, Card, Button, Tabs, etc.:** Reusable UI building blocks.
+#### 5.2.4 OCR Inference
+- **English/General:**
+  - Llama OCR (JavaScript) is invoked via Node.js backend.
+  - Model runs inference on preprocessed image segments.
+  - Outputs text, bounding boxes, and confidence scores.
+- **Regional (e.g., Tamil):**
+  - Custom PyTorch model is invoked via FastAPI.
+  - Model architecture: CNN for feature extraction, BiLSTM for sequence modeling, CTC loss for alignment.
+  - Handles complex ligatures and handwritten scripts.
+  - Outputs text, bounding boxes, and confidence scores.
 
-### Landing Page Components
-- **Hero, Features, Demo, HowItWorks, Testimonials, Footer, CTA:** Modular sections for marketing and onboarding.
+#### 5.2.5 Result Aggregation & Delivery
+- Results from OCR model are aggregated into a structured JSON response.
+- Includes extracted text, confidence scores, bounding boxes, and error flags.
+- Response is sent to frontend for display and user correction.
 
----
+#### 5.2.6 User Correction & Feedback Logging
+- Frontend allows user to edit extracted text inline.
+- Corrections are logged with original image, extracted text, corrected text, and user metadata.
+- Correction logs are stored locally and periodically synced to a central repository for retraining.
 
-## API Endpoints
-### `/api/upload` (POST)
-- Accepts FormData with a file.
-- Saves file to `/public/uploads` with a unique name.
-- Returns `{ filePath }` for use in OCR.
+#### 5.2.7 Self-Retraining Trigger & Pipeline
+- System monitors correction logs for each language/model.
+- When threshold (e.g., 100 corrections) is reached, retraining is triggered.
+- Retraining pipeline:
+  1. Aggregate new training data from correction logs.
+  2. Preprocess images and align with corrected text.
+  3. Augment data (rotation, noise, scaling) for robustness.
+  4. Fine-tune existing model weights using new data.
+  5. Validate model on held-out set; if accuracy improves, proceed to deployment.
 
-### `/api/ocr` (POST)
-- Accepts `{ filePath, options }`.
-- If language is Tamil, calls FastAPI backend; otherwise, uses Llama OCR.
-- Returns `{ markdown }` with extracted text.
+#### 5.2.8 Model Update & Deployment
+- Improved model is versioned and uploaded to Hugging Face Model Hub.
+- Devices periodically check for new model versions.
+- On update, model is downloaded, verified (checksum), and hot-swapped into inference pipeline.
+- Rollback mechanism in case of deployment failure.
 
----
+## 6. Data Flow & Processing Pipeline
+### 6.1 Data Flow Diagram (Textual)
+1. User uploads document →
+2. Backend validates & stores file →
+3. Preprocessing pipeline →
+4. Language/model routing →
+5. OCR inference →
+6. Result aggregation →
+7. Frontend display & correction →
+8. Correction logging →
+9. Retraining trigger →
+10. Model update & deployment
 
-## Data Flow
-1. **User uploads file** via FileUpload/FileDropzone.
-2. **File is validated** (type, size) and previewed.
-3. **Options are selected** (type, language, preprocessing, table extraction).
-4. **File is uploaded** to `/api/upload`.
-5. **OCR is triggered** via `/api/ocr` with file path and options.
-6. **Results are displayed** in OCRResults, with copy/download actions.
+### 6.2 Processing Pipeline Details
+- **Input:** Scanned image or PDF
+- **Preprocessing:** Denoising, deskewing, contrast enhancement, layout analysis
+- **Segmentation:** Line/word/character splitting
+- **Feature Extraction:** CNN layers extract visual features
+- **Sequence Modeling:** BiLSTM layers model character sequences
+- **Decoding:** CTC loss decodes output into text
+- **Postprocessing:** Spellcheck, language model correction
+- **Output:** Structured text, confidence, bounding boxes
 
----
+## 7. AI Model: Theory & Implementation
+### 7.1 Llama OCR (English/General)
+- JavaScript-based, lightweight, optimized for Latin scripts
+- Uses CNN for feature extraction, attention for alignment
+- Fast inference, suitable for real-time applications
+- Integrates with Node.js backend via API
 
-## Utilities & Types
-- **`lib/document-policy.ts`:**
-  - Defines allowed types, max size, retention, sensitive data detection.
-  - Functions: `validateDocument`, `cleanupExpiredDocuments`, `detectSensitiveData`.
-- **`lib/utils.ts`:**
-  - Utility for merging Tailwind class names (`cn`).
-- **`types/ocr.ts`:**
-  - `OCROptions`, `FileUploadProps` interfaces for type safety.
+### 7.2 Custom PyTorch Model (Tamil/Regional)
+- CNN-BiLSTM-CTC architecture
+- Handles complex ligatures, diacritics, and handwritten forms
+- Data augmentation for robustness
+- Trained on synthetic and real-world datasets
+- Exposed via FastAPI REST endpoint
 
----
+### 7.3 Model Training & Fine-Tuning
+- Initial training on large, diverse datasets
+- Fine-tuning with user corrections (active learning)
+- Early stopping, checkpointing, and rollback for stability
+- Model evaluation: accuracy, CER/WER, confusion matrix
 
-## Styling & UI
-- **Tailwind CSS:** Utility-first styling for all components.
-- **Framer Motion:** Animations for transitions, previews, and feedback.
-- **Accessibility:** Keyboard navigation, ARIA labels, focus states.
-- **Responsive Design:** Mobile-first, adapts to all screen sizes.
+## 8. Backend Orchestration & Automation
+### 8.1 Multi-Backend Architecture
+- Node.js for English/general OCR (Llama)
+- FastAPI (Python) for regional OCR (custom PyTorch)
+- API gateway routes requests based on language/model
+- Modular design for easy extension
 
----
+### 8.2 Automation Pipeline
+- File watcher monitors upload directory
+- Automatic preprocessing and inference on new files
+- Correction logs trigger retraining jobs
+- Scheduled tasks for model update checks
+- Logging and monitoring for all stages
 
-## Deployment
-1. **Install dependencies:**
-   ```bash
-   npm install
-   # or yarn install
-   ```
-2. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-3. **Build for production:**
-   ```bash
-   npm run build
-   npm run start
-   ```
-4. **Deploy:**
-   - Recommended: [Vercel](https://vercel.com/)
-   - See Next.js [deployment docs](https://nextjs.org/docs/app/building-your-application/deploying)
+### 8.3 Error Handling & Recovery
+- Input validation at every stage
+- Graceful fallback if model inference fails
+- Retry logic for network/model download errors
+- Alerting for critical failures
 
----
+## 9. Hugging Face Model Deployment
+### 9.1 Model Versioning & Hosting
+- Models are versioned and uploaded to Hugging Face Model Hub
+- Metadata includes language, version, accuracy, and changelog
+- Public/private access controls for privacy
 
-## Usage Examples
-- **Upload a receipt:** Select "Receipt" type, upload image, get structured vendor/items/total extraction.
-- **Handwritten notes:** Select "Handwritten", upload scan, get digital text.
-- **Table extraction:** Enable "Extract Tables" for documents with tabular data.
-- **Tamil OCR:** Select "Tamil" language for regional documents.
+### 9.2 Device Synchronization
+- Devices poll Hugging Face for new model versions
+- Download and verify model integrity (checksum)
+- Hot-swap model in inference pipeline
+- Rollback to previous version if validation fails
 
----
+### 9.3 Deployment Automation
+- CI/CD pipeline automates model packaging and upload
+- Automated tests for model accuracy and compatibility
+- Notification system for successful/failed deployments
 
-## FAQ
-**Q: Are my documents stored permanently?**
-A: No, files are auto-deleted after 24 hours.
+## 10. Raspberry Pi Self-Retraining Logic
+### 10.1 Local Training Pipeline
+- Raspberry Pi aggregates correction logs and new data
+- Preprocessing and augmentation performed locally
+- Fine-tunes model using PyTorch (optimized for ARM)
+- Monitors CPU/memory usage to avoid overload
+- Saves checkpoints and best model locally
 
-**Q: Is my data secure?**
-A: Yes, sensitive data is detected and redacted; files are not shared.
+### 10.2 Model Upload & Distribution
+- After successful retraining, model is uploaded to Hugging Face
+- Devices in the network are notified of new model
+- Download and validation process as in Section 9
 
-**Q: Can I add more OCR languages?**
-A: Yes, extend the OCR backend and update options in the UI.
+### 10.3 Resource Management
+- Training jobs scheduled during low-usage periods
+- Monitors temperature and throttles if overheating
+- Logs resource usage for diagnostics
 
-**Q: How do I customize the UI?**
-A: Edit components in `/components` and styles in `globals.css` or Tailwind config.
+## 11. Security & Privacy
+- All data stored locally by default; cloud sync is optional and encrypted
+- User corrections anonymized before retraining
+- Model downloads and uploads use secure HTTPS
+- Access controls for model and data endpoints
+- Regular security audits and vulnerability scans
 
----
+## 12. Use Cases & Educational Value
+- Digitization of historical manuscripts in regional languages
+- Research datasets for linguistics and AI
+- Hands-on AI/IoT projects for ECE students
+- Community-driven model improvement
 
-For further details, see code comments or contact the project maintainers.
+## 13. Future Work & Research Directions
+- Expand to more languages and scripts
+- Handwriting recognition improvements
+- Federated learning for privacy-preserving model updates
+- Integration with document management systems
+- Real-time mobile OCR
 
-## Getting Started
+## 14. References
+- [Hugging Face Model Hub](https://huggingface.co/)
+- [PyTorch Documentation](https://pytorch.org/docs/)
+- [OpenCV Documentation](https://docs.opencv.org/)
+- [Llama OCR](https://github.com/charlesw/tesseract.js)
 
-First, run the development server:
+## 15. Appendix (Diagrams, Tables, Glossary)
+### 15.1 Glossary
+- **OCR:** Optical Character Recognition
+- **CTC:** Connectionist Temporal Classification
+- **BiLSTM:** Bidirectional Long Short-Term Memory
+- **CER/WER:** Character/Word Error Rate
+- **ARM:** Advanced RISC Machine (Raspberry Pi CPU)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 15.2 Example Correction Log Entry
+```
+{
+  "image_id": "doc_00123",
+  "original_text": "...",
+  "corrected_text": "...",
+  "user_id": "anon_42",
+  "timestamp": "2024-06-01T12:34:56Z",
+  "language": "Tamil"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 15.3 Example Model Metadata
+```
+{
+  "model_name": "ocr-tamil-v2.1",
+  "language": "Tamil",
+  "version": "2.1",
+  "accuracy": 0.94,
+  "date": "2024-06-01",
+  "changelog": "Improved ligature handling, added 500 new samples"
+}
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This documentation provides a comprehensive, technical, and educational overview of the AI-powered OCR system, focusing on the core logic, backend orchestration, self-retraining, and deployment pipeline. It is designed for academic review, team onboarding, and future development reference.
